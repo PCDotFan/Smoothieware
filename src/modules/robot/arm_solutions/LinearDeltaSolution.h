@@ -16,12 +16,16 @@ class LinearDeltaSolution : public BaseSolution {
 
     public:
         LinearDeltaSolution(Config*);
-        void cartesian_to_actuator( float[], float[] );
-        void actuator_to_cartesian( float[], float[] );
+
+        // Kinematics
+        void cartesian_to_actuator(const float[], float[] );
+        void actuator_to_cartesian(const float[], float[] );
+        
+        // Tower lean
         void get_tower_xyz_for_dist(uint8_t tower, float xyz[], float dist);
 
         bool set_optional(const arm_options_t& options);
-        bool get_optional(arm_options_t& options);
+        bool get_optional(arm_options_t& options, bool force_all);
 
     private:
         void init();

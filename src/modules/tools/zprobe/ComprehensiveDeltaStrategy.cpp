@@ -48,6 +48,7 @@
         * See comments in AHB0_dealloc2Df(). It might be my fault, but I've put enough hours in on this already.
     * Audit arrays created during probe calibration & simulated annealing to see if any are candidates for AHB0 migration.
     * Increase probing grid size to 7x7, rather than 5x5. (Needs above AHB0 migration to be done first, crashes otherwise)
+        * Done
     * Elaborate probing grid to be able to support non-square grids (for the sake of people with rectangular build areas).
     * Add "leaning tower" support
       * Add {X, Y, Z(?)} coords for top and bottom of tower & use in FK and IK in robot/arm_solutions/LinearDeltaSolution.cpp/.h
@@ -56,6 +57,8 @@
     * Make G31 B the specific command for heuristic calibration, and have it select O P Q R S (all annealing types) by default.
       * Make the annealer do a test probe rather than printing out the simulated depths.
       * If G31 B is run without args, use the last probed depths.
+    * Add support for modifying/using return_feedrate (see ZProbe.cpp - this was added somewhere around Summer 2015)
+      * Looks like this needs to be added to the config files, too!
     * We are using both three-dimensional (Cartesian) and one-dimensional (depths type, .abs and .rel) arrays. Cartesians are
       necessary for IK/FK, but maybe we can make a type with X, Y, absolute Z, and relative Z, and be done with the multiple types.
       (Except for the depth map, which has to be kept in RAM all the time.)
@@ -1287,7 +1290,7 @@ bool ComprehensiveDeltaStrategy::heuristic_calibration(int annealing_tries, floa
 
     // Other vars
 //    float cur_cartesian[DM_GRID_ELEMENTS][3];
-    int j, k;
+    int /*j,*/ k;
     int try_mod_5;				// Will be set to annealing_try % 5
     float lowest;				// For finding the lowest absolute value of three variables
 
@@ -1296,12 +1299,12 @@ bool ComprehensiveDeltaStrategy::heuristic_calibration(int annealing_tries, floa
     best_set_energy = 999;
 
     // Keep track of energy so that we can bail if the annealing stalls
-    #define LAST_ENERGY_N 6
-    float last_energy[LAST_ENERGY_N];
-    unsigned last_energy_count = 0;
-    for(j=0; j<LAST_ENERGY_N; j++) {
-        last_energy[j] = 0;
-    }
+//    #define LAST_ENERGY_N 6
+//    float last_energy[LAST_ENERGY_N];
+//    unsigned last_energy_count = 0;
+//    for(j=0; j<LAST_ENERGY_N; j++) {
+//        last_energy[j] = 0;
+//    }
 
     
     // ************************************
@@ -1689,7 +1692,7 @@ bool ComprehensiveDeltaStrategy::heuristic_calibration(int annealing_tries, floa
             float tempE = simulate_FK_and_get_energy(test_axis, cur_set->trim, cur_cartesian);
             if(tempE < best_set_energy) {
                 get_kinematics(best_set);
-                _printf("New winner: old energy=%1.3f, new=%1.3f\n", best_set_energy, tempE);
+                //_printf("New winner: old energy=%1.3f, new=%1.3f\n", best_set_energy, tempE);
                 //print_kinematics(best_set);
                 best_set_energy = tempE;
             }
@@ -3688,15 +3691,16 @@ bool ComprehensiveDeltaStrategy::set_virtual_shimming(float x, float y, float z,
 
         // This gets its own special case because Vector3.cpp is incapable of handling null vectors.
         // It will literally calculate that the cross product of {0, 0, 0} and {0, 0, 0} is {nan, nan, nan}.
-        surface_transform->normal.set(0, 0, 1);
+//        surface_transform->normal.set(0, 0, 1);
+        surface_transform->normal = Vector3(0, 0, 1);
         surface_transform->d = 0;
 
     } else {
 
         Vector3 v1, v2, v3;
-        v1.set(surface_transform->tri_points[X][X], surface_transform->tri_points[X][Y], surface_transform->tri_points[X][Z]);
-        v2.set(surface_transform->tri_points[Y][X], surface_transform->tri_points[Y][Y], surface_transform->tri_points[Y][Z]);
-        v3.set(surface_transform->tri_points[Z][X], surface_transform->tri_points[Z][Y], surface_transform->tri_points[Z][Z]);
+        v1 = Vector3(surface_transform->tri_points[X][X], surface_transform->tri_points[X][Y], surface_transform->tri_points[X][Z]);
+        v2 = Vector3(surface_transform->tri_points[Y][X], surface_transform->tri_points[Y][Y], surface_transform->tri_points[Y][Z]);
+        v3 = Vector3(surface_transform->tri_points[Z][X], surface_transform->tri_points[Z][Y], surface_transform->tri_points[Z][Z]);
 
 //        _printf("Vector 1: {%1.3f, %1.3f, %1.3f}\n", v1[X], v1[Y], v1[Z]);
 //        _printf("Vector 2: {%1.3f, %1.3f, %1.3f}\n", v2[X], v2[Y], v2[Z]);
@@ -3855,6 +3859,7 @@ void ComprehensiveDeltaStrategy::print_kinematics() {
     KinematicSettings *settings = new KinematicSettings();
     get_kinematics(settings);
     print_kinematics(settings);
+    delete settings;
 
 }
 
@@ -4041,7 +4046,7 @@ void ComprehensiveDeltaStrategy::rotate2D(float (&point)[2], float reference[2],
 // Blink the idle loop LED.
 void ComprehensiveDeltaStrategy::blink_LED(unsigned char which) {
 
-    if(THEKERNEL->use_leds) {
+    if(THEKERNEL->is_using_leds()) {
         switch(which) {
             case 1:
             case 2:

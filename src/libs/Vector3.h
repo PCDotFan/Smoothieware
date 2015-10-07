@@ -4,13 +4,11 @@
 class Vector3
 {
 public:
-    Vector3();
-    Vector3(float, float, float);
-    Vector3(const Vector3& to_copy);
-    Vector3& operator= (const Vector3& to_copy);
+    Vector3() = default;
+    Vector3(float a, float b, float c) : elem{a,b,c} {}
+    Vector3(const Vector3& to_copy) = default;
 
     float    operator[](int) const;
-    void     set(float a, float b, float c);
     Vector3  cross(const Vector3&) const;
 
     float    dot(const Vector3&) const;
@@ -26,9 +24,10 @@ public:
 
     Vector3  unit(void) const;
 
+    float      * data()       { return elem; }
+    float const* data() const { return elem; }
 private:
-    float  elem[3];
-    static float nan;
+    float  elem[3]{};
 };
 
 // typedef float Vector3[3];

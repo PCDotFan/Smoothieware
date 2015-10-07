@@ -19,10 +19,10 @@ Gcode::Gcode(const string &command, StreamOutput *stream, bool strip)
     this->command= strdup(command.c_str());
     this->m= 0;
     this->g= 0;
+    this->subcode= 0;
     this->add_nl= false;
     this->stream= stream;
     this->millimeters_of_travel = 0.0F;
-    this->accepted_by_module = false;
     prepare_cached_values(strip);
     this->stripped= strip;
 }
@@ -43,9 +43,9 @@ Gcode::Gcode(const Gcode &to_copy)
     this->has_g                 = to_copy.has_g;
     this->m                     = to_copy.m;
     this->g                     = to_copy.g;
+    this->subcode               = to_copy.subcode;
     this->add_nl                = to_copy.add_nl;
     this->stream                = to_copy.stream;
-    this->accepted_by_module    = false;
     this->txt_after_ok.assign( to_copy.txt_after_ok );
 }
 
@@ -58,11 +58,11 @@ Gcode &Gcode::operator= (const Gcode &to_copy)
         this->has_g                 = to_copy.has_g;
         this->m                     = to_copy.m;
         this->g                     = to_copy.g;
+        this->subcode               = to_copy.subcode;
         this->add_nl                = to_copy.add_nl;
         this->stream                = to_copy.stream;
         this->txt_after_ok.assign( to_copy.txt_after_ok );
     }
-    this->accepted_by_module = false;
     return *this;
 }
 
@@ -162,14 +162,27 @@ void Gcode::prepare_cached_values(bool strip)
     if( this->has_letter('G') ) {
         this->has_g = true;
         this->g = this->get_int('G', &p);
+
     } else {
         this->has_g = false;
     }
+
     if( this->has_letter('M') ) {
         this->has_m = true;
         this->m = this->get_int('M', &p);
+
     } else {
         this->has_m = false;
+    }
+
+    if(has_g || has_m) {
+        // look for subcode and extract it
+        if(p != nullptr && *p == '.') {
+            this->subcode = strtoul(p+1, &p, 10);
+
+        }else{
+            this->subcode= 0;
+        }
     }
 
     if(!strip) return;
@@ -180,11 +193,6 @@ void Gcode::prepare_cached_values(bool strip)
         free(command);
         command= n;
     }
-}
-
-void Gcode::mark_as_taken()
-{
-    this->accepted_by_module = true;
 }
 
 // strip off X Y Z I J K parameters if G0/1/2/3

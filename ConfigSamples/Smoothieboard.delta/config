@@ -181,6 +181,8 @@ temperature_control.hotend.beta              4066             # or set the beta 
 temperature_control.hotend.set_m_code        104              #
 temperature_control.hotend.set_and_wait_m_code 109            #
 temperature_control.hotend.designator        T                #
+#temperature_control.hotend.max_temp         300              # Set maximum temperature - Will prevent heating above 300 by default
+#temperature_control.hotend.min_temp         0                # Set minimum temperature - Will prevent heating below 0 by default
 
 
 # Hotend PID configuration
@@ -264,6 +266,10 @@ panel.gamma_jog_feedrate                     200              # z jogging feedra
 panel.hotend_temperature                     220              # temp to set hotend when preheat is selected
 panel.bed_temperature                        60               # temp to set bed when preheat is selected
 
+# kill button (used to be called pause) maybe assigned to a different pin, set to the onboard pin by default
+kill_button_enable                           true             # set to true to enable a kill button
+kill_button_pin                              2.12             # kill button pin. default is same as pause button 2.12 (2.11 is another good choice)
+
 panel.red_led_pin                            2.8              # pin for red led on viki2 on EXP1
 panel.blue_led_pin                           4.29             # pin for blue led on viki2 on EXP1
 panel.buzz_pin                               0.25             # pin for buzzer on EXP2
@@ -312,3 +318,13 @@ laser_module_enable                          false            # Whether to activ
 # ---------------------------------------------------------------------
 dfu_enable                                   true             # for linux developers, set to true to enable DFU
 msd_disable                                  false            # speeds up booting, but you can't mount the SD card over USB
+# network settings
+network.enable                               false            # enable the ethernet network services
+network.webserver.enable                     true             # enable the webserver
+network.telnet.enable                        true             # enable the telnet server
+network.ip_address                           auto             # use dhcp to get ip address
+# uncomment the 3 below to manually setup ip address
+#network.ip_address                           192.168.3.222    # the IP address
+#network.ip_mask                              255.255.255.0    # the ip mask
+#network.ip_gateway                           192.168.3.1      # the gateway address
+#network.mac_override                         xx.xx.xx.xx.xx.xx  # override the mac address, only do this if you have a conflict

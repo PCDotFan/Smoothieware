@@ -173,6 +173,8 @@ temperature_control.hotend.beta             4066              # or set the beta 
 temperature_control.hotend.set_m_code        104              #
 temperature_control.hotend.set_and_wait_m_code 109            #
 temperature_control.hotend.designator        T                #
+#temperature_control.hotend.max_temp         300              # Set maximum temperature - Will prevent heating above 300 by default
+#temperature_control.hotend.min_temp         0                # Set minimum temperature - Will prevent heating below 0 by default
 
 
 # Hotend PID configuration
@@ -191,8 +193,9 @@ temperature_control.hotend.d_factor          15
 temperature_control.bed.enable               true             #
 temperature_control.bed.thermistor_pin       0.23             #
 temperature_control.bed.heater_pin           2.7              #
-temperature_control.bed.beta                 3974             #
-temperature_control.bed.thermistor           Honeywell100K    # 
+temperature_control.bed.thermistor           EPCOS100K        # http://smoothieware.org/temperaturecontrol#toc5
+#temperature_control.bed.beta                4066             # or set the beta value
+
 temperature_control.bed.set_m_code           140              #
 temperature_control.bed.set_and_wait_m_code  190              #
 temperature_control.bed.designator           B                #
@@ -267,6 +270,10 @@ panel.external_sd.sdcd_pin                   1.31!^           # sd detect signal
 
 #panel.spi_channel                           0                 # set spi channel to use P0_18,P0_15 MOSI,SCLK
 #panel.spi_cs_pin                            0.16              # set spi chip select
+
+# kill button (used to be called pause) maybe assigned to a different pin, set to the onboard pin by default
+kill_button_enable                           true             # set to true to enable a kill button
+kill_button_pin                              2.12             # kill button pin. default is same as pause button 2.12 (2.11 is another good choice)
 
 #panel.contrast                              8                 # override contrast setting (default is 9)
 #panel.encoder_resolution                    4                 # override number of clicks to move 1 item (default is 4)
