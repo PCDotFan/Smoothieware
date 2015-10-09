@@ -51,7 +51,7 @@ enum _cds_caltype_t {
     CT_ARM_LENGTH,
     CT_TOWER_ANGLE,
     CT_VIRTUAL_SHIMMING,
-    CT_TOWER_SCALE
+    CT_TOWER_LEAN
 };
 
 // For bit-twiddling, taken from https://github.com/626Pilot/RaspberryPi-NeoPixel-WS2812/blob/master/ws2812-RPi.c
@@ -179,9 +179,9 @@ class KinematicSettings {
     float trim[3];
     float tower_radius[3];
     float tower_angle[3];
-    float tower_arm[3];
+    //float tower_arm[3];
     float virtual_shimming[3];
-    float tower_scale[3];
+    // TODO: Tower lean
     
     void init() {
         initialized = false;
@@ -191,9 +191,8 @@ class KinematicSettings {
             trim[i] = 0;
             tower_radius[i] = 0;
             tower_angle[i] = 0;
-            tower_arm[i] = 0;
+            //tower_arm[i] = 0;
             virtual_shimming[i] = 0;
-            tower_scale[i] = 0;
         }
     }
 
@@ -208,9 +207,9 @@ class KinematicSettings {
             trim[i] = _trim[i];
             tower_radius[i] = _tower_radius[i];
             tower_angle[i] = _tower_angle[i];
-            tower_arm[i] = _tower_arm[i];
+            //tower_arm[i] = _tower_arm[i];
             virtual_shimming[i] = _virtual_shimming[i];
-            tower_scale[i] = _tower_scale[i];
+            // TODO: Tower lean
         }
     }
 
@@ -221,9 +220,9 @@ class KinematicSettings {
             settings->trim[i] = trim[i];
             settings->tower_radius[i] = tower_radius[i];
             settings->tower_angle[i] = tower_angle[i];
-            settings->tower_arm[i] = tower_arm[i];
+            //settings->tower_arm[i] = tower_arm[i];
             settings->virtual_shimming[i] = virtual_shimming[i];
-            settings->tower_scale[i] = tower_scale[i];
+            // TODO: Tower lean
         }
         settings->initialized = true;
 
@@ -243,9 +242,6 @@ struct best_probe_calibration_t {
     float fast;
     float slow;
 };
-
-
-
 
 
 // Bilinear interpolation ("lerp") values.
@@ -289,6 +285,7 @@ struct bili_t {
 
 };
 
+
 // For Z correction
 struct surface_transform_t {
 
@@ -309,6 +306,7 @@ struct surface_transform_t {
 
 };
 
+
 // This holds all calibration types
 struct {
     CalibrationType endstop;
@@ -316,11 +314,11 @@ struct {
     CalibrationType arm_length;
     CalibrationType tower_angle;
     CalibrationType virtual_shimming;
-    CalibrationType tower_scale;
+    // TODO: Tower lean
 } caltype;
 
 
-
+// Main class
 class ComprehensiveDeltaStrategy : public LevelingStrategy {
 
   public:
@@ -351,8 +349,6 @@ class ComprehensiveDeltaStrategy : public LevelingStrategy {
     KinematicSettings *temp_set;
     KinematicSettings *best_set;
     float best_set_energy;
-//    KinematicSettings winning_mu;
-//    KinematicSettings winning_sigma;
 
     // For holding options specific to our arm solution
     BaseSolution::arm_options_t options;
@@ -368,6 +364,7 @@ class ComprehensiveDeltaStrategy : public LevelingStrategy {
     float probe_offset_x;
     float probe_offset_y;
     float probe_offset_z;
+    bool probe_ignore_bed_temp;		// Whether to wait for bed temp to stabilize (set true if you have no HB)
     float probe_radius;
     float mm_probe_height_to_trigger;	// At bed center, distance from probe_height to where probe triggers
     float saved_acceleration;
@@ -397,7 +394,7 @@ class ComprehensiveDeltaStrategy : public LevelingStrategy {
 //    test_point_enum_t active_point[DM_GRID_ELEMENTS];	// Which points are currently being tested
     test_point_enum_t *active_point;			// Which points are currently being tested
 
-    // Contains array indices for points closest to towers, and to center
+    // Contains array indices for points closest to towers, and to center, used for the GeneB calibration (G32)
     int tower_point_idx[4];
 
 
@@ -418,9 +415,7 @@ class ComprehensiveDeltaStrategy : public LevelingStrategy {
     void print_g31_help();
 
     // Inverse and forward kinematics simulation
-//    void simulate_IK(float cartesian[DM_GRID_ELEMENTS][3], float trim[3]);
     void simulate_IK(float **cartesian, float trim[3]);
-//    float simulate_FK_and_get_energy(float axis_position[DM_GRID_ELEMENTS][3], float trim[3], float cartesian[DM_GRID_ELEMENTS][3]);
     float simulate_FK_and_get_energy(float **axis_position, float trim[3], float **cartesian);
 
     // For test points used by parallel simulated annealing and depth correction
@@ -434,7 +429,6 @@ class ComprehensiveDeltaStrategy : public LevelingStrategy {
     bool set_test_trim(float x, float y, float z, bool dummy);
     bool set_test_virtual_shimming(float x, float y, float z, bool dummy);
     void move_randomly_towards(float &value, float best, float temp, float target, float overrun_divisor);
-//    float calc_energy(cds_depths_t points[DM_GRID_ELEMENTS]);
     float calc_energy(cds_depths_t *points);
     float calc_energy(float **cartesian);
 
@@ -483,14 +477,14 @@ class ComprehensiveDeltaStrategy : public LevelingStrategy {
     bool set_tower_angle_offsets(float x, float y, float z, bool update = true);
     bool get_tower_angle_offsets(float &x, float &y, float &z);
 
-    bool set_tower_arm_offsets(float x, float y, float z, bool update = true);
-    bool get_tower_arm_offsets(float &x, float &y, float &z);
+    // Per-tower arm length
+    //bool set_tower_arm_offsets(float x, float y, float z, bool update = true);
+    //bool get_tower_arm_offsets(float &x, float &y, float &z);
 
     bool set_virtual_shimming(float x, float y, float z, bool update = true);
     bool get_virtual_shimming(float &x, float &y, float &z);
 
-    bool set_tower_scale(float x, float y, float z, bool update = true);
-    bool get_tower_scale(float &x, float &y, float &z);
+    // TODO: Getter/setter for tower lean
 
     void set_acceleration(float a);
     void save_acceleration();
@@ -520,7 +514,6 @@ class ComprehensiveDeltaStrategy : public LevelingStrategy {
     void display_calibration_types(bool active, bool inactive);
 
     void str_pad_left(unsigned char spaces);
-    //bool require_clean_geometry();
     void print_task_with_warning(const std::string& str);
     void flush();
     void newline();

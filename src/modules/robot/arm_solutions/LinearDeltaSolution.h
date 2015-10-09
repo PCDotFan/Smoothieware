@@ -52,15 +52,11 @@ class LinearDeltaSolution : public BaseSolution {
         float tower2_angle;
         float tower3_angle;
 
-        // Tower lean: Unit vector pointing from top of tower, to bottom of tower :~)
-        float tower1_vector[3];
-        float tower2_vector[3];
-        float tower3_vector[3];
-
-        // Tower scaling (experimental: interim half-solution for tower lean)
-        float tower1_scale;
-        float tower2_scale;
-        float tower3_scale;
+        // Tower lean: Unit vector pointing from one end of the tower to the other
+        // Commented out because this isn't implemented yet
+        //float tower1_vector[3];
+        //float tower2_vector[3];
+        //float tower3_vector[3];
 
 };
 #endif // LINEARDELTASOLUTION_H

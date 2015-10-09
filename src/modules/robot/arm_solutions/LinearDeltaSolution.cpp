@@ -37,16 +37,11 @@ LinearDeltaSolution::LinearDeltaSolution(Config* config)
     tower2_offset = config->value(tower2_offset_checksum)->by_default(0.0f)->as_number();
     tower3_offset = config->value(tower3_offset_checksum)->by_default(0.0f)->as_number();
     
-    // Tower lean support (disabled)
+    // Tower lean support (TODO)
 //    float up_vector[3] = { 0, 0, 1 };
 //    std::memcpy(tower1_vector, up_vector, sizeof(tower1_vector));
 //    std::memcpy(tower2_vector, up_vector, sizeof(tower2_vector));
 //    std::memcpy(tower3_vector, up_vector, sizeof(tower3_vector));
-
-    // Tower scale support
-    tower1_scale = 1.0f;
-    tower2_scale = 1.0f;
-    tower3_scale = 1.0f;
 
     init();
 }
@@ -87,11 +82,6 @@ void LinearDeltaSolution::cartesian_to_actuator(const float cartesian_mm[], floa
                                        - SQ(delta_tower3_y - cartesian_mm[Y_AXIS])
                                       ) + cartesian_mm[Z_AXIS];
 
-    // Tower scaling
-    actuator_mm[ALPHA_STEPPER] *= tower1_scale;
-    actuator_mm[BETA_STEPPER ] *= tower2_scale;
-    actuator_mm[GAMMA_STEPPER] *= tower3_scale;
-
 }
 
 // Forward kinematics (translates carriage positions into Cartesian XYZ)
@@ -107,9 +97,9 @@ void LinearDeltaSolution::actuator_to_cartesian(const float actuator_mm[], float
 
     // Tower locations & carriage (actuator) positions
     // Current code:
-    Vector3 tower1( delta_tower1_x, delta_tower1_y, actuator_mm[0] * 1/tower1_scale );
-    Vector3 tower2( delta_tower2_x, delta_tower2_y, actuator_mm[1] * 1/tower2_scale );
-    Vector3 tower3( delta_tower3_x, delta_tower3_y, actuator_mm[2] * 1/tower3_scale );
+    Vector3 tower1( delta_tower1_x, delta_tower1_y, actuator_mm[0] );
+    Vector3 tower2( delta_tower2_x, delta_tower2_y, actuator_mm[1] );
+    Vector3 tower3( delta_tower3_x, delta_tower3_y, actuator_mm[2] );
 
 /*
     // Preliminary support for tower lean.
@@ -169,6 +159,8 @@ void LinearDeltaSolution::actuator_to_cartesian(const float actuator_mm[], float
 }
 
 // If the carriage is dist mm away from 0, what are its coordinates, adjusted for tower lean?
+// Disabled because it hasn't been fully implemented yet
+/*
 void LinearDeltaSolution::get_tower_xyz_for_dist(uint8_t tower, float xyz[], float dist)
 {
 
@@ -208,7 +200,7 @@ void LinearDeltaSolution::get_tower_xyz_for_dist(uint8_t tower, float xyz[], flo
     xyz[Z] = vec[Z] * dist;
 
 }
-
+*/
 
 bool LinearDeltaSolution::set_optional(const arm_options_t& options) {
 
@@ -225,14 +217,8 @@ bool LinearDeltaSolution::set_optional(const arm_options_t& options) {
             
             // Already taken or invalid: R, T, Z
             
-            // This block is for the experimental "tower scale" code.
-            // It's likely to be removed soon, as no one has yet reported any gains through this method.
-            case 'H': tower1_scale = i.second; break;
-            case 'I': tower2_scale = i.second; break;
-            case 'J': tower3_scale = i.second; break;
-
             /*
-            // This block is for tower lean support.
+            // TODO: This block is for tower lean support.
             case 'H': tower1_vector[X] = i.second; break;
             case 'I': tower1_vector[Y] = i.second; break;
             case 'J': tower1_vector[Z] = i.second; break; // R is already taken
@@ -256,10 +242,6 @@ bool LinearDeltaSolution::get_optional(arm_options_t& options, bool force_all) {
     options['L']= arm_length;
     options['R']= arm_radius;
 
-    options['H'] = tower1_scale;
-    options['I'] = tower2_scale;
-    options['J'] = tower3_scale;
-
     // Don't return these if none of them are set
     if(force_all || (tower1_offset != 0.0F || tower2_offset != 0.0F || tower3_offset != 0.0F ||
        tower1_angle != 0.0F  || tower2_angle != 0.0F  || tower3_angle != 0.0F) ) {
@@ -272,6 +254,7 @@ bool LinearDeltaSolution::get_optional(arm_options_t& options, bool force_all) {
         options['F'] = tower3_angle;
 
         /*
+        // TODO
         options['H'] = tower1_vector[X];
         options['I'] = tower1_vector[Y];
         options['J'] = tower1_vector[Z];
