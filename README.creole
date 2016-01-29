@@ -2,7 +2,7 @@
 
 **此版代码仍处在测试阶段。** 我不认为调平功能会对你的机器造成损坏，但请将你的手时刻放在复位键上！在运行时千万别离开！
 
-此固件包含了为 Delta 类打印机设计的自动校正系统，您可以在 `src/modules/tools/zprobe/ComprehensiveDeltaStrategy.cpp` 获取相关信息。
+此固件包含了为 Delta 类打印机设计的自动校正系统，您可以在 src/modules/tools/zprobe/ComprehensiveDeltaStrategy.cpp 获取相关信息。
 
 **从 GitHub 下载 FirmwareBin/firmware.bin，将其放在 SD 卡中，重启。 ** 
 
