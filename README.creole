@@ -1,4 +1,5 @@
-## 626Pilot's Delta Calibration - Introduction
+## 626Pilot's Delta Calibration - 介绍
+
 **此版代码仍处在测试阶段。** 我不认为调平功能会对你的机器造成损坏，但请将你的手放在复位键上！在运行时千万别离开！
 
 此固件包含了为 Delta 类打印机设计的自动校正系统，您可以在 `src/modules/tools/zprobe/ComprehensiveDeltaStrategy.cpp` 获取相关信息。
@@ -7,7 +8,9 @@
 
 自动校正系统需要 Z 调平开关，或者是直接使用压敏电阻（FSR），这里有一份我设计的 Z 自动调平装置，大概需要花费 $15 + 一些使用 3D 打印制成的零件： http://www.thingiverse.com/thing:161753 ，还有一个更廉价的（$5）——使用机械限位开关（比前两种方案精度低） http://www.thingiverse.com/thing:1000936 。
 
-或许你会使用到这固件中的配置文件：我将其放在了 ConfigSamples 目录下的  Azteeg X5 或者 Smoothieboard ".delta" 文件夹里。  **建议选用 Smoothieboard 版本，我并没有一台正在工作中的 Azteeg X5.**
+或许你会使用到这固件中的配置文件：我将其放在了 ConfigSamples 目录下的  Azteeg X5 或者 Smoothieboard ".delta" 文件夹里。
+
+**建议选用 Smoothieboard 版本，我并没有一台正在工作中的 Azteeg X5.**
 
 ## 配置文件
 You'll need to pull one of the example files (boardname.delta) out of ConfigSamples and adapt it for your printer. **Make sure you don't leave ANYTHING out.** If you do, strange things may happen!
