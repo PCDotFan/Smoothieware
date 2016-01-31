@@ -1,4 +1,4 @@
-## 626Pilot's Delta Calibration - 介绍
+## 626Pilot's Delta Calibration 介绍
 
 **此版代码仍处在测试阶段。** 我不认为调平功能会对你的机器造成损坏，但请将你的手时刻放在复位键上！在运行时千万别离开！
 
@@ -21,16 +21,16 @@
 ## 校正工作流程
 比较推荐的一种校正方法：
 * G29 E （调平）
-* G32 （校正限位开关/水平半径相关内容 - 在执行结束后别忘了按 M500！）
-* G31 H O P Q R （simulated annealing - corrects for errors in X, Y, and Z - it may help to run this multiple times）
-* G31 A （depth mapping - corrects errors in Z, but not X or Y - benefits from simulated annealing, though）
+* G32 （校正限位开关/水平半径相关内容，在执行结束后别忘了按 M500！）
+* G31 H O P Q R （simulated annealing. corrects for errors in X, Y, and Z - it may help to run this multiple times）
+* G31 A （depth mapping. corrects errors in Z, but not X or Y - benefits from simulated annealing, though）
 * M500 to save everything
 
 *提示：* 输入 G31 可列出所有可用的命令。你可以指定不同的 a full list of its available commands. You can specify different annealing temperature multipliers per-variable! This isn't usually necessary, but nice to have.
 
 
 ## 平面校正
-*重要！* 在此之前先运行一次 G29，to get an idea of how repeatable your probe is - and to tune the probing parameters, which can have a HUGE impact on accuracy! You want 30 microns (0.03mm) or less, 几近于 0. If your probe's repeatability is worse than that, you may have printed your mount too loosely (not enough filament flow) or you may have "delta arm blues" or some other slop in the printer that should be corrected before trying any sort of calibration.
+*重要！* 在此之前先运行一次 G29，to get an idea of how repeatable your probe is , and to tune the probing parameters, which can have a HUGE impact on accuracy! You want 30 microns (0.03mm) or less, 几近于 0. If your probe's repeatability is worse than that, you may have printed your mount too loosely (not enough filament flow) or you may have "delta arm blues" or some other slop in the printer that should be corrected before trying any sort of calibration.
 
 Priming and smoothing will make everything take longer to run, but may provide greater accuracy - provided that they actually provide a benefit, which they may or may not! If you need excessive priming or smoothing, it may be that your feedrates (particularly slow_feedrate) and accelerations are off. If they're too high, you may have repeatability issues; and if they're too low, you may have problems from the steppers vibrating. (They will tend to vibrate more the slower you go!)
 
